@@ -1,0 +1,141 @@
+<template id="template-main">
+	<style type="text/css">
+		#nav {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+		}
+		#left {
+			position: absolute;
+			left: 30px;
+			top: 50%;
+			margin-top: -15px;
+			width: 30px;
+			height: 30px;
+			border-left: 5px solid #fff;
+			border-bottom: 5px solid #fff;
+			transform: rotate(45deg);
+			cursor: pointer;
+		}
+		#right {
+			position: absolute;
+			right: 30px;
+			top: 50%;
+			margin-top: -15px;
+			width: 30px;
+			height: 30px;
+			border-right: 5px solid #fff;
+			border-top: 5px solid #fff;
+			transform: rotate(45deg);
+			cursor: pointer;
+		}
+		#left:hover {
+			border-left: 5px solid #ff6900;
+			border-bottom: 5px solid #ff6900;
+		}
+		#right:hover {
+			border-right: 5px solid #ff6900;
+			border-top: 5px solid #ff6900;
+		}
+	
+		#pointer {
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			padding: 0;
+			transform: translateX(-50%);
+		}
+		#pointer li{
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			margin-right: 5px;
+			border-radius: 50%;
+			background: #fff;
+			cursor: pointer;
+		}
+		#pointer li.cur{
+			background: #ff6900;
+			transform: scale(1.2, 1.2);
+		}
+	</style>
+	<div id="nav">
+		<span id="left"></span>
+		<span id="right"></span>
+		<ul id="pointer"></ul>
+	</div>
+</template>
+
+<script type="text/javascript">
+	(function(global) {
+		var currentDocument = document.currentScript.ownerDocument;
+
+		function getTemplate(selector) {
+			return currentDocument.querySelector(selector).content.cloneNode(true);
+		}
+
+		function createdCallback() {
+			var that = this;
+			var shadowRoot = that.createShadowRoot();
+			shadowRoot.appendChild(getTemplate('#template-main'));
+
+			that.pointer = shadowRoot.querySelector('#pointer');
+			that.left = shadowRoot.querySelector('#left');
+			that.right = shadowRoot.querySelector('#right');
+		}
+
+		function init(nums) {
+
+			var that = this;
+			var lis = [];
+			var cur = 0;
+
+			function turnTo(dest) {
+
+				return function() {
+						cur = dest;
+						var old = that.pointer.querySelector('.cur');
+
+						old && old.classList.remove('cur');
+						lis[cur].classList.add('cur');
+						that.dispatchEvent(new CustomEvent('change', {
+							detail: cur
+						}));
+				}
+			}
+			for (i = 0; i < nums; i++) {
+				li = document.createElement('li');
+				that.pointer.appendChild(li);
+				li.onclick = turnTo(i);
+				lis.push(li);
+			}
+
+			that.left.onclick = function(){
+				cur = (cur - 1 + nums) % nums;
+				turnTo(cur)();
+			};
+
+			that.right.onclick = function(){
+				cur = (cur + 1 + nums) % nums;
+				turnTo(cur)();
+			};
+
+			turnTo(0)();
+		}
+
+		var proto = Object.create(HTMLElement.prototype, {
+			createdCallback: {
+				value: createdCallback
+			},
+			init: {
+				value: init
+			}
+		});
+
+		var HTMLWheelCtrElement = document.registerElement('wheel-ctr', {
+			prototype: proto
+		});
+
+		global.HTMLWheelCtrElement = HTMLWheelCtrElement;
+	}(this));
+</script>

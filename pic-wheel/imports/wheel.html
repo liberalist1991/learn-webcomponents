@@ -1,0 +1,76 @@
+<link rel="import" href="wheel-ctr.html">
+
+<template id="template-main">
+	<style type="text/css">
+
+		#wheel {
+			position: relative;
+			width: 800px;
+			height: 400px;
+			overflow: hidden;
+		}
+		#images {
+			position: absolute;
+			white-space: nowrap;
+			font-size: 0;
+			transition: all 0.5s cubic-bezier(0.4, 1.3, 0.65, 1);
+		}
+		::content img {
+			width: 800px;
+			height: 400px;
+			display: inline-block;
+		}
+
+	</style>
+	<section id="wheel">
+		<div id="images">
+			<content></content>
+		</div>
+	</section>
+</template>
+
+<script type="text/javascript">
+	(function(global) {
+		var currentDocument = document.currentScript.ownerDocument;
+		var width = 800;
+
+		function getTemplate(selector) {
+			return currentDocument.querySelector(selector).content.cloneNode(true);
+		}
+
+		function createdCallback() {
+			var that = this;
+			var width =800;
+			var shadowRoot = that.createShadowRoot();
+			var imgs = that.querySelectorAll('img');
+			shadowRoot.appendChild(getTemplate('#template-main'));
+
+			var images= shadowRoot.querySelector('#images');
+			var ctr = document.createElement('wheel-ctr');
+
+			shadowRoot.querySelector('#wheel').appendChild(ctr);
+			console.log(images);
+
+			function show(cur){
+				images.style['transform'] = 'translateX(-' + (cur * width) + 'px)';
+			}
+
+			ctr.init(imgs.length);
+			ctr.addEventListener('change', function(e) {
+				show(e.detail)
+			});
+		}
+
+		var proto = Object.create(HTMLElement.prototype, {
+			createdCallback: {
+				value: createdCallback
+			}
+		});
+
+		var HTMLImageSliderElement = document.registerElement('pic-wheel', {
+			prototype: proto
+		});
+
+		global.HTMLImageSliderElement = HTMLImageSliderElement;
+	}(this));
+</script>
